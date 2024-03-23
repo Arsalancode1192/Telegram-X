@@ -1,0 +1,59 @@
+import hashlib
+import json
+
+class Wallet:
+    def __init__(self):
+        self.balance = 0
+        self.private_key = self.generate_private_key()
+        self.public_key = self.generate_public_key()
+
+    def generate_private_key(self):
+        return hashlib.sha256(b"my_secret_key").hexdigest()
+
+    def generate_public_key(self):
+        return hashlib.sha256(self.private_key.encode()).hexdigest()
+
+    def deposit(self, amount):
+        self.balance += amount
+
+    def withdraw(self, amount):
+        if amount <= self.balance:
+            self.balance -= amount
+        else:
+            print("Insufficient funds")
+
+    def check_balance(self):
+        return self.balance
+
+    def to_dict(self):
+        return {
+            'balance': self.balance,
+            'public_key': self.public_key
+        }
+
+    def save_wallet(self):
+        with open('wallet.json', 'w') as file:
+            json.dump(self.to_dict(), file)
+
+    def load_wallet(self):
+        with open('wallet.json', 'r') as file:
+            data = json.load(file)
+            self.balance = data['balance']
+            self.public_key = data['public_key']
+
+# مثال استفاده:
+my_wallet = Wallet()
+print("My public key:", my_wallet.public_key)
+
+my_wallet.deposit(100)
+print("Balance after deposit:", my_wallet.check_balance())
+
+my_wallet.withdraw(50)
+print("Balance after withdrawal:", my_wallet.check_balance())
+
+# ذخیره و بازیابی والت
+my_wallet.save_wallet()
+
+new_wallet = Wallet()
+new_wallet.load_wallet()
+print("Loaded wallet balance:", new_wallet.check_balance())
